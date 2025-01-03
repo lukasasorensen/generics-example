@@ -1,7 +1,6 @@
-import { Collection, Db, MongoClient, ServerApiVersion } from "mongodb";
+import { Collection, Db, MongoClient, ServerApiVersion, WithId } from "mongodb";
 
-interface IUser {
-  _id: string;
+interface IUser extends WithId<Document> {
   email: string;
   firstName: string;
   lastName: string;
@@ -63,20 +62,28 @@ export class UserClient {
 }
 
 export class HtmlUtil {
-  createHtmlWithBody(content: string) {
+  static createHtmlWithBody(content: string) {
     return `<html><body>${content}</body></html>`;
+  }
+}
+
+export class UserNameUtil {
+  static getUserFullName(user: IUser) {
+    let fullName = user.firstName;
+    if (user.lastName) {
+      fullName += user.lastName;
+    }
+    return fullName;
   }
 }
 
 export class WelcomePageRenderer {
   renderWelcomePageForUser(user: IUser, options: IWelcomePageOptions) {
-    let name = user.firstName;
+    let name = options.includeLastName
+      ? user.firstName
+      : UserNameUtil.getUserFullName(user);
 
-    if (options.includeLastName && user.lastName) {
-      name += " " + user.lastName;
-    }
-
-    return new HtmlUtil().createHtmlWithBody(
+    return HtmlUtil.createHtmlWithBody(
       `<h1 class="greeting">${options.greeting ?? "Welcome"} ${name}</h1><a href="/home">${options.enterButtonText ?? "Enter"}</a>`,
     );
   }
@@ -91,7 +98,7 @@ export class GoodExample {
 
   async getWelcomePageForUser(userId: string): Promise<string> {
     try {
-      const user: IUser = await this.userClient.getUserById(userId);
+      const user: IUser = (await this.userClient.getUserById(userId)) as IUser;
 
       return new WelcomePageRenderer().renderWelcomePageForUser(user, {
         includeLastName: true,

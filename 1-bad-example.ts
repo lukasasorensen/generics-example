@@ -1,7 +1,6 @@
-import { MongoClient, ServerApiVersion } from "mongodb";
+import { MongoClient, ServerApiVersion, WithId } from "mongodb";
 
-interface IUser {
-  _id: string;
+interface IUser extends WithId<Document> {
   email: string;
   firstName: string;
   lastName: string;
@@ -9,7 +8,9 @@ interface IUser {
 
 export default class BadExample {
   async getWelcomePageForUser(userId: string): Promise<string> {
-    const uri = process.env.MONGODB_URI;
+    const uri =
+      "mongodb+srv://example:kejf3ek@example.foo.mongodb.net/?retryWrites=true&w=majority&appName=example";
+
     const options = {
       serverApi: {
         version: ServerApiVersion.v1,
@@ -20,10 +21,10 @@ export default class BadExample {
 
     const mongoClient = new MongoClient(uri, options);
 
-    const user: IUser = await mongoClient
+    const user: IUser = (await mongoClient
       .db("mongodb_example")
       .collection("users")
-      .findOne({ id: userId });
+      .findOne({ id: userId })) as IUser;
 
     if (!user) {
       throw new Error("No User Found");

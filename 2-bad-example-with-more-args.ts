@@ -1,6 +1,6 @@
-import { MongoClient, ServerApiVersion } from "mongodb";
+import { MongoClient, ServerApiVersion, WithId } from "mongodb";
 
-interface IUser {
+interface IUser extends WithId<Document> {
   email: string;
   firstName: string;
   lastName: string;
@@ -19,14 +19,16 @@ export default class BadExample {
     userId: string,
     options: IWelcomePageOptions,
   ): Promise<string> {
-    const mongoClient = new MongoClient(
-      options.dbUri ?? process.env.MONGODB_URI,
-      options.dbOptions,
-    );
+    const uri = options.dbUri ?? process.env.MONGODB_URI;
 
-    const user: IUser = await mongoClient
+    if (!uri) throw new Error("Missing Db URI");
+
+    const mongoClient = new MongoClient(uri, options.dbOptions);
+
+    const user: IUser = (await mongoClient
       .db(options.dbName ?? "mongodb_example")
-      .findOne({ id: userId });
+      .collection("users")
+      .findOne({ id: userId })) as IUser;
 
     if (!user) {
       throw new Error("No User Found");
