@@ -77,13 +77,19 @@ export class UserNameUtil {
   }
 }
 
-export class WelcomePageRenderer {
+export class PageRenderer {
+  renderPage(content: string) {
+    return HtmlUtil.createHtmlWithBody(content);
+  }
+}
+
+export class WelcomePageRenderer extends PageRenderer {
   renderWelcomePageForUser(user: IUser, options: IWelcomePageOptions) {
     let name = options.includeLastName
       ? user.firstName
       : UserNameUtil.getUserFullName(user);
 
-    return HtmlUtil.createHtmlWithBody(
+    return this.renderPage(
       `<h1 class="greeting">${options.greeting ?? "Welcome"} ${name}</h1><a href="/home">${options.enterButtonText ?? "Enter"}</a>`,
     );
   }
