@@ -106,7 +106,9 @@ export class GoodExample {
     try {
       const user: IUser = (await this.userClient.getUserById(userId)) as IUser;
 
-      return new WelcomePageRenderer().renderWelcomePageForUser(user, {
+      if (!user._id) throw new Error('No User Found!');
+
+      return new WelcomePageRenderer().renderWelcomePageForUser(user._id, {
         includeLastName: true,
         enterButtonText: "Join The Darkside",
       });

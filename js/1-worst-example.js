@@ -1,13 +1,7 @@
-import { MongoClient, ServerApiVersion, WithId } from "mongodb";
+import { MongoClient, ServerApiVersion } from "mongodb";
 
-interface IUser extends WithId<Document> {
-  email: string;
-  firstName: string;
-  lastName: string;
-}
-
-export default class BadExample {
-  async getWelcomePageForUser(userId: string): Promise<string> {
+export default class OneClassBadExample {
+  async getWelcomePageForUser(userId) {
     const uri =
       "mongodb+srv://example:kejf3ek@example.foo.mongodb.net/?retryWrites=true&w=majority&appName=example";
 
@@ -21,10 +15,10 @@ export default class BadExample {
 
     const mongoClient = new MongoClient(uri, options);
 
-    const user: IUser = (await mongoClient
+    const user = await mongoClient
       .db("mongodb_example")
       .collection("users")
-      .findOne({ id: userId })) as IUser;
+      .findOne({ id: userId });
 
     if (!user) {
       throw new Error("No User Found");
@@ -36,7 +30,7 @@ export default class BadExample {
       name += " " + user.lastName;
     }
 
-    let html: string = `<html><h1 class="greeting">Welcome ${name}</h1><a href="/home">Enter</a></html>`;
+    let html = `<html><h1 class="greeting">Welcome ${name}</h1><a href="/home">Enter</a></html>`;
 
     return html;
   }

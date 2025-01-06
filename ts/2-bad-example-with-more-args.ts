@@ -6,27 +6,23 @@ interface IUser extends WithId<Document> {
   lastName: string;
 }
 
-interface IWelcomePageOptions {
-  includeLastName?: boolean;
-  enterButtonText?: string;
-  dbOptions?: object;
-  dbUri?: string;
-  dbName?: string;
-}
-
 export default class BadExample {
   async getWelcomePageForUser(
     userId: string,
-    options: IWelcomePageOptions,
+    includeLastName: boolean,
+    enterButtonText: string,
+    dbOptions: object,
+    dbUri: string,
+    dbName: string
   ): Promise<string> {
-    const uri = options.dbUri ?? process.env.MONGODB_URI;
+    const uri = dbUri;
 
     if (!uri) throw new Error("Missing Db URI");
 
-    const mongoClient = new MongoClient(uri, options.dbOptions);
+    const mongoClient = new MongoClient(uri, dbOptions);
 
     const user: IUser = (await mongoClient
-      .db(options.dbName ?? "mongodb_example")
+      .db(dbName ?? "mongodb_example")
       .collection("users")
       .findOne({ id: userId })) as IUser;
 
@@ -36,11 +32,11 @@ export default class BadExample {
 
     let name = user.firstName;
 
-    if (options.includeLastName && user.lastName) {
+    if (includeLastName && user.lastName) {
       name += " " + user.lastName;
     }
 
-    let html: string = `<html><h1 class="greeting">Welcome ${name}</h1><a href="/home">${options.enterButtonText ?? "Enter"}</a></html>`;
+    let html: string = `<html><h1 class="greeting">Welcome ${name}</h1><a href="/home">${enterButtonText ?? "Enter"}</a></html>`;
 
     return html;
   }
